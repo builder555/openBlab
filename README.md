@@ -18,3 +18,6 @@ Parts required:
 If using a 12V peltier device, you will also need
 * [12V power supply](https://s.click.aliexpress.com/e/_DePtWNZ)
 * [buck converter](https://s.click.aliexpress.com/e/_DDBOrqR)
+
+For actual sample:
+* [Agar plates](https://s.click.aliexpress.com/e/_DCe6UFd)
