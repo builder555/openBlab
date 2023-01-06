@@ -1,8 +1,6 @@
 ## OpenBLab
 
-
 <img src="petri-monitor-sm.jpg" alt="photo" align="right">
-
 
 This is an open-source lab automation project.
 
@@ -10,7 +8,7 @@ The ideal process would be as follows, add a culture to the agar gel, set the te
 
 <br clear="both"/>
 
----
+##
 
 Parts required:
 
