@@ -1,10 +1,7 @@
 ## OpenBLab
 
-<div align="right" style="float:right; text-align:right;">
 
-![photo](petri-monitor-sm.jpg)
-
-</div>
+<img src="petri-monitor-sm.jpg" alt="photo" align="right">
 
 
 This is an open-source lab automation project.
