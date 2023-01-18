@@ -23,3 +23,9 @@ If using a 12V peltier device, you will also need
 
 For the sample:
 * [Agar plates](https://s.click.aliexpress.com/e/_DCe6UFd)
+
+##
+
+Example UI
+
+<img src="screen1.png" width="600">
