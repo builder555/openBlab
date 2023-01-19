@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+
+[dev-packages]
+pytest = "*"
+pytest-watch = "*"
+requests-mock = "*"
+mutmut = "*"
+httpx = "*"
+
+[requires]
+python_version = "3"
+
+[scripts]
+"test" = "pytest"
+"testmon" = "ptw --runner 'pytest -sv'"
+"mutation" = "mutmut run --paths-to-mutate=app --paths-to-exclude=app/tests --tests-dir=app/tests"
+"start:dev" = "uvicorn app.main:_app --reload --host=0.0.0.0"
+"start" = "uvicorn app.main:_app --host=0.0.0.0"

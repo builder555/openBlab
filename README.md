@@ -29,3 +29,13 @@ For the sample:
 Example UI
 
 <img src="screen1.png" width="600">
+
+##
+
+Run API:
+
+```
+cd code/api 
+pipenv install
+pipenv run start:dev
+```
