@@ -1,6 +1,6 @@
 ## OpenBLab
 
-<img src="petri-monitor-sm.jpg" alt="photo" align="right">
+<img src="assets/petri-monitor-sm.jpg" alt="photo" align="right">
 
 This is an open-source lab automation project.
 
@@ -28,7 +28,7 @@ For the sample:
 
 Example UI
 
-<img src="screen1.png" width="600">
+<img src="assets/screen1.png" width="600">
 
 ##
 
