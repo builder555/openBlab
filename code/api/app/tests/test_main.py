@@ -1,16 +1,26 @@
-from fastapi import FastAPI
 import pytest
 from fastapi.testclient import TestClient
-from app.main import _app, get_db, ExperimentModel, ExperimentDBModel, LocalDB
+from unittest.mock import MagicMock, patch
+from app.main import _app
+from app.main import get_db
+from app.main import get_hardware
+from app.local_db import LocalDB
+from app.hardware import TemperatureControl
+from app.hardware import SensorsInterface
+
+mock_sensors = MagicMock(spec=SensorsInterface)
+temp_control = TemperatureControl(mock_sensors)
+BadSensors = MagicMock(spec=SensorsInterface, side_effect=Exception)
 
 @pytest.fixture()
 def client():
-    LDB = LocalDB()
-    def get_new_db():
-        return LDB
-    _app.dependency_overrides[get_db] = get_new_db
+    mock_sensors.reset_mock()
+    test_db = LocalDB()
+    _app.dependency_overrides[get_db] = lambda: test_db
+    _app.dependency_overrides[get_hardware] = lambda: temp_control
     client = TestClient(_app)
     return client
+
 
 class TestMain:
 
@@ -59,9 +69,54 @@ class TestMain:
             'snapshots_hr': 2,
         }
         client.post("/experiments", json=experiment_data)
-        response2 = client.post("/experiments", json=experiment_data)
-        assert response2.status_code == 400
+        response = client.post("/experiments", json=experiment_data)
+        assert response.status_code == 400
 
     def test_cannot_get_nonexistent_experiment(self, client):
         response = client.get("/experiments/1")
         assert response.status_code == 404
+
+    @patch('concurrent.futures.ThreadPoolExecutor')
+    @patch('app.hardware.sleep')
+    def test_new_experiment_turns_on_heater_if_temperature_is_low(self, mock_sleep, mock_executor, client):
+        def stop_experiment(*a,**kw):
+            temp_control.is_running = False
+        experiment_data = {
+            'specimen': 'R. stolonifer',
+            'temperature': 37,
+            'snapshots_hr': 2,
+        }
+        mock_sensors.get_temperature.return_value = 35
+        mock_sleep.side_effect = stop_experiment
+        mock_executor.return_value.__enter__.return_value.submit = lambda run: run()
+        client.post("/experiments", json=experiment_data)
+        assert mock_sensors.heat_on.called
+
+    @patch('concurrent.futures.ThreadPoolExecutor')
+    @patch('app.hardware.sleep')
+    def test_new_experiment_turns_off_heater_if_temperature_is_high(self, mock_sleep, mock_executor, client):
+        def stop_experiment(*a,**kw):
+            temp_control.is_running = False
+        experiment_data = {
+            'specimen': 'R. stolonifer',
+            'temperature': 30,
+            'snapshots_hr': 2,
+        }
+        mock_sensors.get_temperature.return_value = 35
+        mock_sleep.side_effect = stop_experiment
+        mock_executor.return_value.__enter__.return_value.submit = lambda run: run()
+        client.post("/experiments", json=experiment_data)
+        assert mock_sensors.heat_off.called
+        assert not mock_sensors.heat_on.called
+
+    @patch('app.main.Sensors', new=BadSensors)
+    def test_starting_new_experiment_without_hardware_returns_error(self, client):
+        experiment_data = {
+            'specimen': 'R. stolonifer',
+            'temperature': 37,
+            'snapshots_hr': 2,
+        }
+        _app.dependency_overrides[get_hardware] = get_hardware
+        response = client.post("/experiments", json=experiment_data)
+        assert response.status_code == 500
+        assert response.json() == {'detail': 'Hardware not available'}
