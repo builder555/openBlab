@@ -2,9 +2,7 @@
 
 <img src="assets/petri-monitor-sm.jpg" alt="photo" align="right">
 
-This is an open-source lab automation project.
-
-The ideal process would be as follows, add a culture to the agar gel, set the temperature and frequency with which the camera should take snapshots, then press START. Monitor the progress remotely.
+Unleash the power of automation in your lab with this culture monitoring system! Using a Raspberry Pi camera and off-the-shelf components, the system makes it a breeze to track the growth of your cultures. Simply add your sample to the agar gel, set the temperature and snapshot frequency, press START and sit back. Monitor your progress remotely and watch your results soar!
 
 <br clear="both"/>
 
