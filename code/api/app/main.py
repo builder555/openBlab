@@ -4,8 +4,6 @@ from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.local_db import ExperimentModel
 from app.local_db import LocalDB
-from app.hardware import Sensors
-from app.hardware import DS18B20
 from app.hardware import TemperatureControl
 import logging
 import os
@@ -13,6 +11,9 @@ import os
 log_level = os.environ.get('LOG_LEVEL', 'WARNING').upper()
 log_level = log_level if log_level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] else 'WARNING'
 logging.basicConfig(level=getattr(logging, log_level))
+logging.getLogger().setLevel(getattr(logging, log_level))
+log = logging.getLogger()
+log.info(f'set logging level to {log_level}')
 
 origins = [
     'http://localhost',
@@ -38,21 +39,16 @@ def get_db():
     return db
 
 def get_hardware():
-    try:
-        sensors = Sensors(
-            heater_pin=17, 
-            temp_sensor=DS18B20()
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Hardware not available")
-    return TemperatureControl(sensors)
+    return TemperatureControl(heater_pin=17)
 
 @_app.get('/ping')
 def ping():
     return {"ping": "pong!"}
 
 @_app.post('/experiments')
-def start_new_experiment(experiment_data: ExperimentModel, db: LocalDB = Depends(get_db), hw: TemperatureControl = Depends(get_hardware)):
+async def start_new_experiment(experiment_data: ExperimentModel, 
+                         db: LocalDB = Depends(get_db), 
+                         hw: TemperatureControl = Depends(get_hardware)):
     is_running = any([v for v in db.items() if v.is_running])
     if is_running:
         raise HTTPException(status_code=400, detail="An experiment is already running")

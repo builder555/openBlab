@@ -6,15 +6,12 @@ from app.main import get_db
 from app.main import get_hardware
 from app.local_db import LocalDB
 from app.hardware import TemperatureControl
-from app.hardware import SensorsInterface
 
-mock_sensors = MagicMock(spec=SensorsInterface)
-temp_control = TemperatureControl(mock_sensors)
-BadSensors = MagicMock(spec=SensorsInterface, side_effect=Exception)
+temp_control = TemperatureControl(heater_pin=17)
+
 
 @pytest.fixture()
 def client():
-    mock_sensors.reset_mock()
     test_db = LocalDB()
     _app.dependency_overrides[get_db] = lambda: test_db
     _app.dependency_overrides[get_hardware] = lambda: temp_control
@@ -27,6 +24,7 @@ def test_ping(client):
     assert response.status_code == 200
     assert response.json() == {"ping": "pong!"}
 
+@patch('app.hardware.Popen', new=MagicMock())
 def test_start_new_experiment(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -45,6 +43,7 @@ def test_cannot_start_experiment_with_missing_data(client):
     response = client.post("/experiments", json=experiment_data)
     assert response.status_code == 422
 
+@patch('app.hardware.Popen', new=MagicMock())
 def test_get_existing_experiment(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -60,6 +59,7 @@ def test_get_existing_experiment(client):
         **experiment_data
     }
 
+@patch('app.hardware.Popen', new=MagicMock())
 def test_cannot_start_experiment_when_one_is_running(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -73,48 +73,3 @@ def test_cannot_start_experiment_when_one_is_running(client):
 def test_cannot_get_nonexistent_experiment(client):
     response = client.get("/experiments/1")
     assert response.status_code == 404
-
-@patch('concurrent.futures.ThreadPoolExecutor')
-@patch('app.hardware.sleep')
-def test_new_experiment_turns_on_heater_if_temperature_is_low(mock_sleep, mock_executor, client):
-    def stop_experiment(*a,**kw):
-        temp_control.is_running = False
-    experiment_data = {
-        'specimen': 'R. stolonifer',
-        'temperature': 37,
-        'snapshots_hr': 2,
-    }
-    mock_sensors.get_temperature.return_value = 35
-    mock_sleep.side_effect = stop_experiment
-    mock_executor.return_value.__enter__.return_value.submit = lambda run: run()
-    client.post("/experiments", json=experiment_data)
-    assert mock_sensors.heat_on.called
-
-@patch('concurrent.futures.ThreadPoolExecutor')
-@patch('app.hardware.sleep')
-def test_new_experiment_turns_off_heater_if_temperature_is_high(mock_sleep, mock_executor, client):
-    def stop_experiment(*a,**kw):
-        temp_control.is_running = False
-    experiment_data = {
-        'specimen': 'R. stolonifer',
-        'temperature': 30,
-        'snapshots_hr': 2,
-    }
-    mock_sensors.get_temperature.return_value = 35
-    mock_sleep.side_effect = stop_experiment
-    mock_executor.return_value.__enter__.return_value.submit = lambda run: run()
-    client.post("/experiments", json=experiment_data)
-    assert mock_sensors.heat_off.called
-    assert not mock_sensors.heat_on.called
-
-@patch('app.main.Sensors', new=BadSensors)
-def test_starting_new_experiment_without_hardware_returns_error(client):
-    experiment_data = {
-        'specimen': 'R. stolonifer',
-        'temperature': 37,
-        'snapshots_hr': 2,
-    }
-    _app.dependency_overrides[get_hardware] = get_hardware
-    response = client.post("/experiments", json=experiment_data)
-    assert response.status_code == 500
-    assert response.json() == {'detail': 'Hardware not available'}
