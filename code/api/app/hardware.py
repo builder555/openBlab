@@ -18,6 +18,13 @@ class TemperatureControl:
 
     def start_temp_control(self):
         self.process = Popen(['/bin/bash', 'tcontrol.sh', str(self.heater_pin), str(self.temperature)])
+    
+    def stop_experiment(self):
+        if self.process:
+            log.info('Stopping experiment')
+            self.process.send_signal(2)
+            self.process.wait()
+            self.process = None
 
     def __del__(self):
         try:

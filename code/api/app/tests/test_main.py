@@ -35,6 +35,35 @@ def test_start_new_experiment(client):
     assert response.status_code == 200
     assert response.json() == {"id": 1}
 
+@patch('app.hardware.Popen', new=MagicMock())
+def test_stop_experiment(client):
+    experiment_data = {
+        'specimen': 'R. stolonifer',
+        'temperature': 37,
+        'snapshots_hr': 2,
+    }
+    client.post("/experiments", json=experiment_data)
+    response = client.delete("/experiments/1")
+    assert response.status_code == 200
+    assert response.json() == {"id": 1}
+
+@patch('app.hardware.Popen', new=MagicMock())
+def test_stopping_experiment_updates_database(client):
+    experiment_data = {
+        'specimen': 'R. stolonifer',
+        'temperature': 37,
+        'snapshots_hr': 2,
+    }
+    client.post("/experiments", json=experiment_data)
+    client.delete("/experiments/1")
+    response = client.get("/experiments/1")
+    assert response.status_code == 200
+    assert response.json() == {
+        'id': 1,
+        'is_running': False,
+        **experiment_data
+    }
+
 def test_cannot_start_experiment_with_missing_data(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
