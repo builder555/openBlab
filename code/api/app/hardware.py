@@ -22,7 +22,8 @@ class TemperatureControl:
     def __del__(self):
         try:
             SIGINT = 2
-            self.p.send_signal(SIGINT)
-            self.p.wait()
+            if self.process:
+                self.process.send_signal(SIGINT)
+                self.process.wait()
         except:
             pass

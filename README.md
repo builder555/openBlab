@@ -31,6 +31,7 @@ For the sample:
 
 Ensure 1-wire module is loaded on RPi:
  - add `dtoverlay=w1-gpio,gpiopin=14` line to /boot/config.txt
+ - `sudo apt install bc`
  - reboot
 
 Connect DS18B20 to RPi: 

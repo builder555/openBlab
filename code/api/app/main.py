@@ -11,8 +11,8 @@ import os
 log_level = os.environ.get('LOG_LEVEL', 'WARNING').upper()
 log_level = log_level if log_level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] else 'WARNING'
 logging.basicConfig(level=getattr(logging, log_level))
-logging.getLogger().setLevel(getattr(logging, log_level))
 log = logging.getLogger()
+log.setLevel(getattr(logging, log_level))
 log.info(f'set logging level to {log_level}')
 
 origins = [
@@ -39,7 +39,7 @@ def get_db():
     return db
 
 def get_hardware():
-    return TemperatureControl(heater_pin=17)
+    return TemperatureControl(heater_pin=18)
 
 @_app.get('/ping')
 def ping():
