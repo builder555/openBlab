@@ -71,3 +71,7 @@ def stop_experiment(experiment_id: int, db = Depends(get_db), hw = Depends(get_h
         return {"id": experiment_id}
     except:
         raise HTTPException(status_code=404, detail="Experiment not found")
+
+@_app.get('/experiments')
+def get_all_experiments(db = Depends(get_db)):
+    return db.items()

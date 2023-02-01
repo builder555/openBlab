@@ -63,6 +63,21 @@ def test_get_existing_experiment(client):
         **experiment_data
     }
 
+@patch('app.hardware.Popen', new=MagicMock())
+def test_list_past_experiments(client):
+    experiment_data = {
+        'specimen': 'R. stolonifer',
+        'temperature': 40,
+        'snapshots_hr': 3,
+    }
+    client.post("/experiments", json=experiment_data)
+    response = client.get("/experiments")
+    assert response.status_code == 200
+    assert response.json() == [{
+        'id': 1,
+        'is_running': True,
+        **experiment_data
+    }]
 
 @patch('app.hardware.Popen', new=MagicMock())
 def test_stopping_experiment_updates_database(client):
