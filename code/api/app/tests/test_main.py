@@ -43,7 +43,7 @@ def test_stop_experiment(client):
         'snapshots_hr': 2,
     }
     client.post("/experiments", json=experiment_data)
-    response = client.delete("/experiments/1")
+    response = client.put("/experiments/1/stop")
     assert response.status_code == 200
     assert response.json() == {"id": 1}
 
@@ -55,7 +55,7 @@ def test_stopping_experiment_updates_database(client):
         'snapshots_hr': 2,
     }
     client.post("/experiments", json=experiment_data)
-    client.delete("/experiments/1")
+    client.put("/experiments/1/stop")
     response = client.get("/experiments/1")
     assert response.status_code == 200
     assert response.json() == {
@@ -63,6 +63,10 @@ def test_stopping_experiment_updates_database(client):
         'is_running': False,
         **experiment_data
     }
+
+def test_cannot_stop_nonexistent_experiment(client):
+    response = client.put("/experiments/53/stop")
+    assert response.status_code == 404
 
 def test_cannot_start_experiment_with_missing_data(client):
     experiment_data = {

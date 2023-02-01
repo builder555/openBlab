@@ -63,11 +63,11 @@ def get_existing_experiment(experiment_id: int, db = Depends(get_db)):
     except:
         raise HTTPException(status_code=404, detail="Experiment not found")
 
-@_app.delete('/experiments/{experiment_id}')
+@_app.put('/experiments/{experiment_id}/stop')
 def stop_experiment(experiment_id: int, db = Depends(get_db), hw = Depends(get_hardware)):
     try:
-        hw.stop_experiment()
         db.get(experiment_id).is_running = False
+        hw.stop_experiment()
         return {"id": experiment_id}
     except:
         raise HTTPException(status_code=404, detail="Experiment not found")
