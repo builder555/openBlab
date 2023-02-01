@@ -48,6 +48,23 @@ def test_stop_experiment(client):
     assert response.json() == {"id": 1}
 
 @patch('app.hardware.Popen', new=MagicMock())
+def test_get_existing_experiment(client):
+    experiment_data = {
+        'specimen': 'R. stolonifer',
+        'temperature': 40,
+        'snapshots_hr': 3,
+    }
+    response = client.post("/experiments", json=experiment_data)
+    response = client.get("/experiments/1")
+    assert response.status_code == 200
+    assert response.json() == {
+        'id': 1,
+        'is_running': True,
+        **experiment_data
+    }
+
+
+@patch('app.hardware.Popen', new=MagicMock())
 def test_stopping_experiment_updates_database(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -75,22 +92,6 @@ def test_cannot_start_experiment_with_missing_data(client):
     }
     response = client.post("/experiments", json=experiment_data)
     assert response.status_code == 422
-
-@patch('app.hardware.Popen', new=MagicMock())
-def test_get_existing_experiment(client):
-    experiment_data = {
-        'specimen': 'R. stolonifer',
-        'temperature': 40,
-        'snapshots_hr': 3,
-    }
-    response = client.post("/experiments", json=experiment_data)
-    response = client.get("/experiments/1")
-    assert response.status_code == 200
-    assert response.json() == {
-        'id': 1,
-        'is_running': True,
-        **experiment_data
-    }
 
 @patch('app.hardware.Popen', new=MagicMock())
 def test_cannot_start_experiment_when_one_is_running(client):
