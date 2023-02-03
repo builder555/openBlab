@@ -1,0 +1,25 @@
+@import './base.css';
+
+.panel-heading {
+  border-radius: 0;
+  background-color: var(--color-header-background);
+  color: var(--color-text);
+}
+.panel {
+  border: none;
+  border-radius: 25px;
+}
+.panel-block {
+  color: var(--color-text);
+  border-bottom-color: var(--color-background-mute) !important;
+}
+
+.panel-block:hover {
+  background-color: var(--color-background-soft) !important;
+  color: var(--color-text);
+}
+
+.panel-block:last-child {
+  border-bottom-right-radius: 24px;
+  border-bottom-left-radius: 24px;
+}

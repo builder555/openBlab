@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>openBlab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/default/bulmaswatch.min.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="app">
+      <section class="hero is-fullheight">
+        <div class="hero-body">
+          <div class="login">
+            <div class="block header">
+              <img
+                src="petri-monitor-sm.png"
+                alt="logo"
+                width="80"
+                align="left"
+                style="margin-top:-24px;"
+              >
+              <h1 class="title is-1 has-text-grey block">OpenBLab</h1>
+            </div>
+            <section class="container">
+              <div class="columns is-multiline">
+                <div class="column is-8 is-offset-2 register">
+                  <div class="columns">
+                    <div class="column left">
+                      <img
+                        src="https://via.placeholder.com/450x450?text=no camera"
+                        alt=""
+                      >
+                    </div>
+                    <div class="column right has-text-centered">
+                      <form @submit.stop.prevent="startExperiment">
+                        <div class="field">
+                          <div class="control">
+                            <input
+                              v-model="specimen"
+                              class="input is-medium is-rounded"
+                              type="text"
+                              placeholder="Specimen"
+                              required 
+                            />
+                          </div>
+                        </div>
+                        <div class="field">
+                            Snapshot frequency
+                            <div class="has-border-radius-medium has-border-color-black">
+                              <input
+                                v-model="snapshotRate"
+                                type="range"
+                                min="1"
+                                max="30"
+                                class="slider-input"
+                              >
+                              {{snapshotRate}}/hr
+                            </div>
+                        </div>
+                        <div class="field">
+                            Temperature
+                            <div class="has-border-radius-medium has-border-color-black">
+                              <input
+                                v-model="temperature"
+                                type="range"
+                                min="25"
+                                max="50"
+                                class="slider-input"
+                              >
+                              {{temperature}}ºC
+                            </div>
+                        </div>
+                        <button
+                          class="button is-block is-fullwidth is-primary is-medium is-rounded"
+                          type="submit"
+                        >
+                          Start
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <br>
+            <nav class="panel">
+              <p class="panel-heading">
+                Experiments
+              </p>
+              <a
+                v-for="experiment in experiments"
+                class="panel-block"
+                :class="{ 'is-active': experiment.is_running }"
+              >
+                <span
+                  class="panel-icon"
+                  @click="stopExperiment(experiment.id)"
+                >
+                  <i
+                    class="fa-circle"
+                    :class="{ 'fas': experiment.is_running, 'far': !experiment.is_running }"
+                  ></i>
+                </span>
+                {{experiment.specimen}} - {{experiment.temperature}}ºC
+              </a>
+            </nav>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script type="module">
+      import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+      //import { Line } from 'https://cdnjs.cloudflare.com/ajax/libs/vue-chartjs/5.2.0/index.min.js';
+      import app from './app.js';
+      createApp(app).mount('#app');
+    </script>
+  </body>
+</html>

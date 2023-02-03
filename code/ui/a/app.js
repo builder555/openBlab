@@ -1,8 +1,8 @@
 export default {
-  data:() => ({
+  data: () => ({
     snapshotRate: 1,
     temperature: 37,
-    specimen: '',
+    specimen: "",
     baseUrl: `${window.location.protocol}//${window.location.hostname}:8000/`,
     experiments: [],
   }),
@@ -19,10 +19,10 @@ export default {
       // console.log(JSON.parse(JSON.stringify(this.experiments)));
     },
     async startExperiment() {
-      const response = await fetch(`${this.baseUrl}experiments`, {
-        method: 'POST',
+      await fetch(`${this.baseUrl}experiments`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           snapshots_hr: this.snapshotRate,
@@ -34,11 +34,11 @@ export default {
     },
     async stopExperiment(experimentId) {
       await fetch(`${this.baseUrl}experiments/${experimentId}/stop`, {
-        method: 'PUT',
+        method: "PUT",
       });
       this.experiments = this.experiments.map((e) => {
         if (e.id === experimentId) {
-          return {...e, is_running: false};
+          return { ...e, is_running: false };
         }
         return e;
       });
