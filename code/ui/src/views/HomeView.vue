@@ -134,10 +134,11 @@ export default {
         <br />
         <nav class="panel">
           <p class="panel-heading">Experiments</p>
-          <a
+          <RouterLink
             v-for="experiment in experiments"
             :key="experiment.id"
             class="panel-block"
+            :to="`/experiment/${experiment.id}`"
           >
             <span class="panel-icon" @click="stopExperiment(experiment.id)">
               <i
@@ -149,7 +150,7 @@ export default {
               ></i>
             </span>
             {{ experiment.specimen }} - {{ experiment.temperature }}ºC
-          </a>
+          </RouterLink>
         </nav>
       </div>
     </div>
