@@ -10,7 +10,6 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "vue-chartjs";
-import { RouterLink } from "vue-router";
 const chartConfig = {
   data: {
     labels: [
@@ -50,9 +49,6 @@ const chartConfig = {
     },
   },
 };
-// Gridlines color: #b5c5b3
-// Data points color: #f7c6c0
-// Data line color: #f4898b
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -81,7 +77,6 @@ export default {
 </script>
 <template>
   <section class="section">
-    <!-- link to main page -->
     <div class="container">
       <RouterLink to="/">&lt;&lt; Home</RouterLink>
       <h1 class="title">Experiment Title</h1>
