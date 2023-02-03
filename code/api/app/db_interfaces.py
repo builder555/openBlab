@@ -1,6 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 class ExperimentModel(BaseModel):
@@ -12,6 +12,13 @@ class ExperimentModel(BaseModel):
 class ExperimentDBModel(ExperimentModel):
     id: int
     is_running: bool
+    started: Optional[int] = None
+
+
+class ExperimentDetailsDBModel(ExperimentDBModel):
+    snapshots: List[tuple]
+    temperatures: List[tuple]
+
 
 class Database(ABC):
     @abstractmethod
@@ -24,4 +31,8 @@ class Database(ABC):
 
     @abstractmethod
     def items(self) -> List[ExperimentDBModel]:
+        pass
+
+    @abstractmethod
+    def get_details(self, experiment_id: int) -> ExperimentDetailsDBModel:
         pass

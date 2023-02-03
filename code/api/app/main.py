@@ -59,7 +59,7 @@ async def start_new_experiment(experiment_data: ExperimentModel,
 @_app.get('/experiments/{experiment_id}')
 def get_existing_experiment(experiment_id: int, db = Depends(get_db)):
     try:
-        return db.get(experiment_id)
+        return db.get_details(experiment_id)
     except:
         raise HTTPException(status_code=404, detail="Experiment not found")
 

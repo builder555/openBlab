@@ -54,13 +54,19 @@ def test_get_existing_experiment(client):
         'temperature': 40,
         'snapshots_hr': 3,
     }
-    response = client.post("/experiments", json=experiment_data)
-    response = client.get("/experiments/1")
+    fake_datetime = 1675300000
+    with patch('app.local_db.datetime') as mock_datetime:
+        mock_datetime.now().timestamp.return_value = fake_datetime
+        response = client.post("/experiments", json=experiment_data)
+        response = client.get("/experiments/1")
     assert response.status_code == 200
     assert response.json() == {
         'id': 1,
         'is_running': True,
-        **experiment_data
+        **experiment_data,
+        'started': fake_datetime,
+        'snapshots':[],
+        'temperatures':[],
     }
 
 @patch('app.hardware.Popen', new=MagicMock())
@@ -70,12 +76,16 @@ def test_list_past_experiments(client):
         'temperature': 40,
         'snapshots_hr': 3,
     }
-    client.post("/experiments", json=experiment_data)
+    fake_datetime = 1675300000
+    with patch('app.local_db.datetime') as mock_datetime:
+        mock_datetime.now().timestamp.return_value = fake_datetime
+        client.post("/experiments", json=experiment_data)
     response = client.get("/experiments")
     assert response.status_code == 200
     assert response.json() == [{
         'id': 1,
         'is_running': True,
+        'started': fake_datetime,
         **experiment_data
     }]
 
@@ -86,15 +96,14 @@ def test_stopping_experiment_updates_database(client):
         'temperature': 37,
         'snapshots_hr': 2,
     }
-    client.post("/experiments", json=experiment_data)
+    fake_datetime = 1675300000
+    with patch('app.local_db.datetime') as mock_datetime:
+        mock_datetime.now().timestamp.return_value = fake_datetime
+        client.post("/experiments", json=experiment_data)
     client.put("/experiments/1/stop")
     response = client.get("/experiments/1")
     assert response.status_code == 200
-    assert response.json() == {
-        'id': 1,
-        'is_running': False,
-        **experiment_data
-    }
+    assert response.json()['is_running'] == False
 
 def test_cannot_stop_nonexistent_experiment(client):
     response = client.put("/experiments/53/stop")

@@ -1,6 +1,8 @@
 from typing import List
 from app.db_interfaces import ExperimentModel
 from app.db_interfaces import ExperimentDBModel
+from app.db_interfaces import ExperimentDetailsDBModel
+from datetime import datetime
 
 class LocalDB:
 
@@ -12,6 +14,7 @@ class LocalDB:
         new_item = ExperimentDBModel(
             id=experiment_id,
             is_running=True,
+            started=int(datetime.now().timestamp()),
             **experiment.dict()
         )
         self.experiments.append(new_item)
@@ -19,6 +22,16 @@ class LocalDB:
 
     def get(self, experiment_id: int) -> ExperimentDBModel:
         return self.experiments[experiment_id-1]
+    
+    def get_details(self, experiment_id: int) -> ExperimentDetailsDBModel:
+        basic_info = self.get(experiment_id)
+        snapshots = []
+        temperatures = []
+        return ExperimentDetailsDBModel(
+            **basic_info.dict(),
+            snapshots=snapshots,
+            temperatures=temperatures,
+        )
 
     def items(self) -> List[ExperimentDBModel]:
         return self.experiments
