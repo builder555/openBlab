@@ -4,6 +4,7 @@ if [ $# -ne 2 ]; then
     echo "Usage: $0 <pin number> <desired temperature>"
     exit 1
 fi
+
 # run a dummy loop on non-raspberry pi systems
 if ! test -d /sys/bus/w1/devices/28-*/; then
     echo "Running dummy loop"
@@ -11,8 +12,8 @@ if ! test -d /sys/bus/w1/devices/28-*/; then
         echo $(date +%s) $((RANDOM%10000)) >> /tmp/temperature.log
         sleep 10
     done
+    exit 0
 fi
-exit 0
 
 pin=$1
 desired_temp=$(($2*1000))
