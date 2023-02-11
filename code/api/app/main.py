@@ -35,10 +35,10 @@ _app.add_middleware(
 
 db = LocalDB()
 
-def get_db():
+def get_db() -> LocalDB:
     return db
 
-def get_hardware():
+def get_hardware() -> TemperatureControl:
     return TemperatureControl(heater_pin=18)
 
 @_app.get('/ping')
@@ -57,14 +57,14 @@ async def start_new_experiment(experiment_data: ExperimentModel,
     return {"id": new_id}
 
 @_app.get('/experiments/{experiment_id}')
-def get_existing_experiment(experiment_id: int, db = Depends(get_db)):
+def get_existing_experiment(experiment_id: int, db: LocalDB = Depends(get_db)):
     try:
         return db.get_details(experiment_id)
     except:
         raise HTTPException(status_code=404, detail="Experiment not found")
 
 @_app.put('/experiments/{experiment_id}/stop')
-def stop_experiment(experiment_id: int, db = Depends(get_db), hw = Depends(get_hardware)):
+def stop_experiment(experiment_id: int, db: LocalDB = Depends(get_db), hw: TemperatureControl = Depends(get_hardware)):
     try:
         db.get(experiment_id).is_running = False
         hw.stop_experiment()
@@ -73,5 +73,5 @@ def stop_experiment(experiment_id: int, db = Depends(get_db), hw = Depends(get_h
         raise HTTPException(status_code=404, detail="Experiment not found")
 
 @_app.get('/experiments')
-def get_all_experiments(db = Depends(get_db)):
+def get_all_experiments(db: LocalDB = Depends(get_db)):
     return db.items()
