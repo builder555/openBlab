@@ -5,18 +5,18 @@ if [ $# -ne 2 ]; then
     exit 1
 fi
 
+pin=$1
+desired_temp=$(($2*1000))
+
 # run a dummy loop on non-raspberry pi systems
 if ! test -d /sys/bus/w1/devices/28-*/; then
     echo "Running dummy loop"
     while true; do
-        echo $(date +%s) $((RANDOM%10000)) >> /tmp/temperature.log
+        echo $(date +%s) $((desired_temp + RANDOM % 1000)) >> /tmp/temperature.log
         sleep 10
     done
     exit 0
 fi
-
-pin=$1
-desired_temp=$(($2*1000))
 
 Kp=0.5*0.001
 
