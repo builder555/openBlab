@@ -2,8 +2,10 @@ from fastapi import FastAPI
 from fastapi import Depends
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.local_db import ExperimentModel
 from app.local_db import LocalDB
+from app.db_interfaces import ExperimentModel
+from app.db_interfaces import DatabaseIface
+from app.db_interfaces import ExperimentNotFoundException
 from app.hardware import TemperatureControl
 import logging
 import os
@@ -35,7 +37,7 @@ _app.add_middleware(
 
 db = LocalDB()
 
-def get_db() -> LocalDB:
+def get_db() -> DatabaseIface:
     return db
 
 def get_hardware() -> TemperatureControl:
@@ -47,7 +49,7 @@ def ping():
 
 @_app.post('/experiments')
 async def start_new_experiment(experiment_data: ExperimentModel, 
-                         db: LocalDB = Depends(get_db), 
+                         db: DatabaseIface = Depends(get_db), 
                          hw: TemperatureControl = Depends(get_hardware)):
     is_running = any([v for v in db.items() if v.is_running])
     if is_running:
@@ -57,21 +59,21 @@ async def start_new_experiment(experiment_data: ExperimentModel,
     return {"id": new_id}
 
 @_app.get('/experiments/{experiment_id}')
-def get_existing_experiment(experiment_id: int, db: LocalDB = Depends(get_db)):
+def get_existing_experiment(experiment_id: int, db: DatabaseIface = Depends(get_db)):
     try:
         return db.get_details(experiment_id)
-    except:
+    except ExperimentNotFoundException:
         raise HTTPException(status_code=404, detail="Experiment not found")
 
 @_app.put('/experiments/{experiment_id}/stop')
-def stop_experiment(experiment_id: int, db: LocalDB = Depends(get_db), hw: TemperatureControl = Depends(get_hardware)):
+def stop_experiment(experiment_id: int, db: DatabaseIface = Depends(get_db), hw: TemperatureControl = Depends(get_hardware)):
     try:
         db.get(experiment_id).is_running = False
         hw.stop_experiment()
         return {"id": experiment_id}
-    except:
+    except ExperimentNotFoundException:
         raise HTTPException(status_code=404, detail="Experiment not found")
 
 @_app.get('/experiments')
-def get_all_experiments(db: LocalDB = Depends(get_db)):
+def get_all_experiments(db: DatabaseIface = Depends(get_db)):
     return db.items()
