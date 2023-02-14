@@ -3,6 +3,9 @@ from abc import abstractmethod
 from typing import List, Optional
 from pydantic import BaseModel
 
+class ExperimentNotFoundException(Exception):
+    pass
+
 class ExperimentModel(BaseModel):
     specimen: str
     temperature: int
@@ -20,7 +23,7 @@ class ExperimentDetailsDBModel(ExperimentDBModel):
     temperatures: List[tuple]
 
 
-class Database(ABC):
+class DatabaseIface(ABC):
     @abstractmethod
     def add(self, experiment: ExperimentModel) -> int:
         pass
