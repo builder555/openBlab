@@ -2,9 +2,12 @@ from typing import List
 from app.db_interfaces import ExperimentModel
 from app.db_interfaces import ExperimentDBModel
 from app.db_interfaces import ExperimentDetailsDBModel
+from app.db_interfaces import ExperimentNotFoundException
+from app.db_interfaces import DatabaseIface
 from datetime import datetime
 
-class LocalDB:
+
+class LocalDB(DatabaseIface):
 
     def __init__(self):
         self.experiments = []
@@ -21,7 +24,9 @@ class LocalDB:
         return experiment_id
 
     def get(self, experiment_id: int) -> ExperimentDBModel:
-        return self.experiments[experiment_id-1]
+        if experiment_id > len(self.experiments):
+            raise ExperimentNotFoundException
+        return self.experiments[experiment_id - 1]
     
     def get_details(self, experiment_id: int) -> ExperimentDetailsDBModel:
         basic_info = self.get(experiment_id)
