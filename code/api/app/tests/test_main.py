@@ -5,16 +5,15 @@ from app.main import _app
 from app.main import get_db
 from app.main import get_hardware
 from app.local_db import LocalDB
-from app.hardware import TemperatureControl
 
-temp_control = TemperatureControl(heater_pin=17)
+fake_temp_control = MagicMock()
 
 
 @pytest.fixture()
 def client():
     test_db = LocalDB()
     _app.dependency_overrides[get_db] = lambda: test_db
-    _app.dependency_overrides[get_hardware] = lambda: temp_control
+    _app.dependency_overrides[get_hardware] = lambda: fake_temp_control
     client = TestClient(_app)
     return client
 
@@ -24,8 +23,7 @@ def test_ping(client):
     assert response.status_code == 200
     assert response.json() == {"ping": "pong!"}
 
-@patch('app.hardware.Popen', new=MagicMock())
-def test_start_new_experiment(client):
+def test_start_new_experiment_starts_hardware_service(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
         'temperature': 37,
@@ -34,9 +32,10 @@ def test_start_new_experiment(client):
     response = client.post("/experiments", json=experiment_data)
     assert response.status_code == 200
     assert response.json() == {"id": 1}
+    assert fake_temp_control.start_experiment.called
+    fake_temp_control.start_experiment.assert_called_once_with(temperature=37, snapshots_hr=2)
 
-@patch('app.hardware.Popen', new=MagicMock())
-def test_stop_experiment(client):
+def test_stop_experiment_stops_hardware_service(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
         'temperature': 37,
@@ -46,8 +45,8 @@ def test_stop_experiment(client):
     response = client.put("/experiments/1/stop")
     assert response.status_code == 200
     assert response.json() == {"id": 1}
+    assert fake_temp_control.stop_experiment.called
 
-@patch('app.hardware.Popen', new=MagicMock())
 def test_get_existing_experiment(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -69,7 +68,6 @@ def test_get_existing_experiment(client):
         'temperatures':[],
     }
 
-@patch('app.hardware.Popen', new=MagicMock())
 def test_list_past_experiments(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -89,7 +87,6 @@ def test_list_past_experiments(client):
         **experiment_data
     }]
 
-@patch('app.hardware.Popen', new=MagicMock())
 def test_stopping_experiment_updates_database(client):
     experiment_data = {
         'specimen': 'R. stolonifer',
@@ -117,7 +114,6 @@ def test_cannot_start_experiment_with_missing_data(client):
     response = client.post("/experiments", json=experiment_data)
     assert response.status_code == 422
 
-@patch('app.hardware.Popen', new=MagicMock())
 def test_cannot_start_experiment_when_one_is_running(client):
     experiment_data = {
         'specimen': 'R. stolonifer',

@@ -1,6 +1,5 @@
 from subprocess import Popen
 import logging
-from app.local_db import ExperimentDBModel
 log = logging.getLogger()
 
 
@@ -10,10 +9,10 @@ class TemperatureControl:
         self.process = None
         self.heater_pin = heater_pin
 
-    def start_experiment(self, experiment: ExperimentDBModel):
-        log.info(f'Starting experiment with T: {experiment.temperature}C')
-        self.temperature = experiment.temperature
-        self.snapshots_hr = experiment.snapshots_hr
+    def start_experiment(self, temperature: int, snapshots_hr: int):
+        log.info(f'Starting experiment with T: {temperature}C')
+        self.temperature = temperature
+        self.snapshots_hr = snapshots_hr
         self.start_temp_control()
 
     def start_temp_control(self):

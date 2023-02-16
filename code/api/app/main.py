@@ -55,7 +55,8 @@ async def start_new_experiment(experiment_data: ExperimentModel,
     if is_running:
         raise HTTPException(status_code=400, detail="An experiment is already running")
     new_id = db.add(experiment_data)
-    hw.start_experiment(db.get(new_id))
+    experiment = db.get(new_id)
+    hw.start_experiment(temperature=experiment.temperature, snapshots_hr=experiment.snapshots_hr)
     return {"id": new_id}
 
 @_app.get('/experiments/{experiment_id}')
