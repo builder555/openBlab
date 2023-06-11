@@ -60,7 +60,7 @@ def test_get_existing_experiment(client):
         response = client.get("/experiments/1")
     assert response.status_code == 200
     assert response.json() == {
-        'id': 1,
+        'id': '1',
         'is_running': True,
         **experiment_data,
         'started': fake_datetime,
@@ -81,7 +81,7 @@ def test_list_past_experiments(client):
     response = client.get("/experiments")
     assert response.status_code == 200
     assert response.json() == [{
-        'id': 1,
+        'id': '1',
         'is_running': True,
         'started': fake_datetime,
         **experiment_data

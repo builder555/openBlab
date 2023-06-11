@@ -15,7 +15,7 @@ class LocalDB(DatabaseIface):
     def add(self, experiment: ExperimentModel) -> int:
         experiment_id = len(self.experiments) + 1
         new_item = ExperimentDBModel(
-            id=experiment_id,
+            id=str(experiment_id),
             is_running=True,
             started=int(datetime.now().timestamp()),
             **experiment.dict()

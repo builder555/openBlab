@@ -13,14 +13,14 @@ class ExperimentModel(BaseModel):
 
 
 class ExperimentDBModel(ExperimentModel):
-    id: int
+    id: str
     is_running: bool
     started: Optional[int] = None
 
 
 class ExperimentDetailsDBModel(ExperimentDBModel):
-    snapshots: List[tuple]
-    temperatures: List[tuple]
+    snapshots: List[tuple] = []
+    temperatures: List[tuple] = []
 
 
 class DatabaseIface(ABC):
